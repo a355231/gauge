@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;" />
+    <title>Gauge</title>
+    <link rel="stylesheet" href="app.css" />
+    <style>
+      body {
+        background: transparent;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      #app {
+        margin: 8px;
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 10px 10px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      header .title {
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        flex: 1;
+      }
+      header .title span {
+        font-weight: 400;
+        color: var(--text-muted);
+      }
+
+      /* ---- hero: the one big number in this view ---- */
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-ring {
+        flex: none;
+        width: 66px;
+        height: 66px;
+      }
+      .hero-ring circle {
+        fill: none;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+      .hero-ring .ring-track {
+        stroke: color-mix(in srgb, var(--status, var(--idle)) 18%, var(--surface-2));
+      }
+      .hero-ring .ring-fill {
+        stroke: var(--status, var(--idle));
+        transition: stroke-dashoffset 0.6s var(--ease);
+      }
+      .hero-body {
+        min-width: 0;
+        flex: 1;
+      }
+      .hero-value {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .hero-number {
+        font-size: 40px;
+        font-weight: 650;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+      .hero-unit {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+      .hero-sub {
+        margin-top: 3px;
+        font-size: 11.5px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hero-reset {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .hero-status {
+        align-self: flex-start;
+      }
+
+      /* ---- provider cards ---- */
+      .list {
+        max-height: 560px;
+        overflow-y: auto;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .card {
+        padding: 10px 11px 9px;
+        border-radius: 10px;
+        background: var(--surface-0);
+        border: 1px solid var(--border);
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mono {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text-secondary);
+      }
+      .card-name {
+        font-size: 12.5px;
+        font-weight: 650;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card-value {
+        margin: 7px 0 5px;
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+      .card-number {
+        font-size: 21px;
+        font-weight: 640;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+      }
+      .card-unit {
+        font-size: 11.5px;
+        color: var(--text-secondary);
+      }
+      .card-note {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .card-msg {
+        margin: 6px 0 2px;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      .card-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .skeleton {
+        height: 8px;
+        border-radius: 4px;
+        background: var(--surface-2);
+        animation: pulse 1.3s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-top: 1px solid var(--border);
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      footer .grow { flex: 1; }
+      footer button {
+        border: 0;
+        background: none;
+        padding: 0;
+        font: inherit;
+        color: var(--text-muted);
+        cursor: pointer;
+      }
+      footer button:hover { color: var(--text-primary); }
+
+
+      /* ---- drill-down detail view ---- */
+      .detail-head {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .detail-title { font-size: 12.5px; font-weight: 650; }
+      .detail-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+      .detail-tabs { padding: 9px 12px 4px; }
+      .detail-cols {
+        display: grid;
+        align-items: center;
+        column-gap: 8px;
+        padding: 4px 12px 5px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+      }
+      .detail-list { max-height: 430px; overflow-y: auto; padding: 4px 0 6px; }
+      .drow {
+        display: grid;
+        align-items: center;
+        column-gap: 8px;
+        padding: 5px 12px;
+        font-size: 11.5px;
+      }
+      .drow:hover { background: var(--surface-0); }
+      .drow .m {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-primary);
+      }
+      .drow .num {
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
+      .drow .pool { font-variant-numeric: tabular-nums; text-align: right; color: var(--text-muted); }
+      .cols-pricing, .drow.pricing { grid-template-columns: 1fr 92px 34px; }
+      .cols-requests, .drow.requests { grid-template-columns: 1fr 100px; }
+      .detail-change {
+        padding: 7px 12px;
+        font-size: 10.5px;
+        color: var(--text-secondary);
+        background: var(--surface-0);
+        border-bottom: 1px solid var(--border);
+      }
+      .detail-foot {
+        padding: 8px 12px;
+        border-top: 1px solid var(--border);
+        font-size: 10.5px;
+        color: var(--text-muted);
+      }
+      .chev {
+        flex: none;
+        color: var(--text-muted);
+        display: grid;
+        place-items: center;
+      }
+      .chev svg { width: 13px; height: 13px; }
+      .card.clickable { cursor: pointer; }
+      .card.clickable:hover { border-color: var(--border-strong); }
+
+      .empty {
+        padding: 26px 18px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="title">Gauge <span id="head-count"></span></div>
+        <button class="icon-btn" id="btn-refresh" title="Refresh now" aria-label="Refresh now">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 8a6 6 0 1 1-1.8-4.3" />
+            <path d="M14 2v3.6h-3.6" />
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="2.3" />
+            <path d="M13 8a5 5 0 0 0-.1-1l1.3-1-1.3-2.2-1.5.5a5 5 0 0 0-1.7-1L9.4 1.7H6.6L6.3 3.3a5 5 0 0 0-1.7 1l-1.5-.5L1.8 6l1.3 1a5 5 0 0 0 0 2l-1.3 1L3.1 12.2l1.5-.5a5 5 0 0 0 1.7 1l.3 1.6h2.8l.3-1.6a5 5 0 0 0 1.7-1l1.5.5L14.2 10l-1.3-1a5 5 0 0 0 .1-1Z" />
+          </svg>
+        </button>
+      </header>
+
+      <section class="hero" id="hero" hidden>
+        <svg class="hero-ring" viewBox="0 0 66 66" aria-hidden="true">
+          <circle class="ring-track" cx="33" cy="33" r="27" stroke-width="7" />
+          <circle class="ring-fill" id="ring-fill" cx="33" cy="33" r="27" stroke-width="7" stroke-dasharray="169.6" stroke-dashoffset="169.6" />
+        </svg>
+        <div class="hero-body">
+          <div class="hero-value">
+            <span class="hero-number" id="hero-number">--</span>
+            <span class="hero-unit" id="hero-unit"></span>
+          </div>
+          <div class="hero-sub" id="hero-sub"></div>
+          <div class="hero-reset" id="hero-reset"></div>
+        </div>
+        <div class="hero-status" id="hero-status"></div>
+      </section>
+
+      <div class="list" id="list"></div>
+      <section id="detail" hidden></section>
+
+      <footer>
+        <span id="updated">Loading...</span>
+        <span class="grow"></span>
+        <button id="btn-quit">Quit</button>
+      </footer>
+    </div>
+    <script src="panel.js"></script>
+  </body>
+</html>

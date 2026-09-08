@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;" />
+    <title>Gauge Settings</title>
+    <link rel="stylesheet" href="app.css" />
+    <style>
+      body {
+        background: var(--surface-0);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .titlebar {
+        -webkit-app-region: drag;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 0 0 16px;
+        height: 40px;
+        flex: none;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-1);
+      }
+      .titlebar h1 {
+        font-size: 12.5px;
+        font-weight: 650;
+        margin: 0;
+        flex: 1;
+      }
+      .win-btn {
+        -webkit-app-region: no-drag;
+        width: 44px;
+        height: 40px;
+        border: 0;
+        background: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+      }
+      .win-btn:hover { background: var(--surface-2); color: var(--text-primary); }
+      .win-btn.close:hover { background: var(--critical); color: #fff; }
+      .win-btn svg { width: 11px; height: 11px; }
+
+      main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 20px 24px;
+      }
+
+      .section + .section { margin-top: 24px; }
+      .section-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .section-head h2 {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .section-head p {
+        margin: 0;
+        font-size: 11.5px;
+        color: var(--text-muted);
+      }
+
+      .panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .prov + .prov { border-top: 1px solid var(--border); }
+      .prov-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+      .mono {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-secondary);
+      }
+      .prov-title { flex: 1; min-width: 0; }
+      .prov-title .n { font-size: 13px; font-weight: 640; }
+      .prov-title .s { font-size: 11.5px; color: var(--text-muted); }
+
+      .prov-body {
+        padding: 0 14px 14px 50px;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .detected {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11.5px;
+        color: var(--text-secondary);
+      }
+      .detected svg { width: 12px; height: 12px; flex: none; color: var(--good); }
+      .detected.none svg { color: var(--text-muted); }
+
+      .field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+      .field .row { display: flex; gap: 6px; }
+      .field .help { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+      .result {
+        font-size: 11.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 9px;
+        border-radius: 8px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+      }
+      .result svg { width: 12px; height: 12px; flex: none; }
+      .result.ok svg { color: var(--good); }
+      .result.bad svg { color: var(--critical); }
+
+      .row-setting {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+      }
+      .row-setting + .row-setting { border-top: 1px solid var(--border); }
+      .row-setting .t { flex: 1; min-width: 0; }
+      .row-setting .t .n { font-size: 12.5px; font-weight: 600; }
+      .row-setting .t .d { font-size: 11.5px; color: var(--text-muted); }
+      .row-setting select { width: auto; min-width: 120px; }
+
+
+      footer {
+        flex: none;
+        padding: 10px 20px;
+        border-top: 1px solid var(--border);
+        background: var(--surface-1);
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      footer .grow { flex: 1; }
+      footer svg { width: 12px; height: 12px; flex: none; }
+      #crypto-note { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+      .disabled-body { display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="titlebar">
+      <h1>Gauge Settings</h1>
+      <button class="win-btn" id="win-min" aria-label="Minimize">
+        <svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.3"><path d="M1 6h10" /></svg>
+      </button>
+      <button class="win-btn close" id="win-close" aria-label="Close">
+        <svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.3"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" /></svg>
+      </button>
+    </div>
+
+    <main>
+      <div class="section">
+        <div class="section-head">
+          <h2>Trackers</h2>
+          <p>Turn each source on or off, and add credentials.</p>
+        </div>
+        <div class="panel" id="providers"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>General</h2></div>
+        <div class="panel" id="general"></div>
+      </div>
+    </main>
+
+    <footer>
+      <span id="crypto-note"></span>
+      <span class="grow"></span>
+      <span id="version"></span>
+    </footer>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

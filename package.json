@@ -1,0 +1,50 @@
+{
+  "name": "gauge-tray",
+  "productName": "Gauge",
+  "version": "1.0.0",
+  "description": "A system tray meter for your AI coding usage: Claude Code, OpenRouter, OpenCode Zen (Go) and Codex.",
+  "main": "src/main/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "node tools/make-icon.js && electron-builder --win msi",
+    "icon": "node tools/make-icon.js"
+  },
+  "author": "Mason",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "dev.mason.gauge",
+    "productName": "Gauge",
+    "copyright": "Mason",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "msi"
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "Gauge-${version}-Setup.${ext}"
+    },
+    "msi": {
+      "upgradeCode": "6D333B74-C33E-4B89-9F64-9C23A97D5A37",
+      "oneClick": false,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Gauge"
+    }
+  }
+}
